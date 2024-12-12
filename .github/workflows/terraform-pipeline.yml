@@ -37,30 +37,13 @@ jobs:
                 terraform_version: latest
 
             - name: Azure Login
-              if: github.event_name == 'pull_request'
-              uses: azure/login@v1
-              with:
-                client-id: ${{ vars.CLIENT_ID_PULL_REQUEST }}
-                tenant-id: ${{ vars.TENANT_ID }}
-                subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}        
-
-            - name: Azure Login
-              if: github.event_name == 'push'    
               uses: azure/login@v1
               with:
                 client-id: ${{ vars.CLIENT_ID }}
                 tenant-id: ${{ vars.TENANT_ID }}
-                subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}   
+                subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}          
 
             - name: Terraform Init
-              if: github.event_name == 'pull_request'
-              run: |
-                terraform init \
-                -backend-config="client_id=${{ vars.CLIENT_ID_PULL_REQUEST }}" \
-                -backend-config="tenant_id=${{ vars.TENANT_ID }}"
-
-            - name: Terraform Init
-              if: github.event_name == 'push' 
               run: |
                 terraform init \
                 -backend-config="client_id=${{ vars.CLIENT_ID }}" \
@@ -94,4 +77,3 @@ jobs:
               if: github.event_name == 'push'    
               run: |
                 terraform apply -auto-approve tfplan-${{ matrix.environment }}
-        
