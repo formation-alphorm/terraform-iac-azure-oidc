@@ -1,21 +1,19 @@
-/*
-resource "azurerm_resource_group" "main" {
-  name     = var.resource_group_name
-  location = var.location
+data "azurerm_resource_group" "main" {
+  name = var.resource_group_name
 }
 
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
   sku                 = "Basic"
   admin_enabled       = true
 }
 
 resource "azurerm_app_service_plan" "asp" {
   name                = var.app_service_plan_name
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   sku {
     tier = "Basic"
     size = "B1"
@@ -24,8 +22,8 @@ resource "azurerm_app_service_plan" "asp" {
 
 resource "azurerm_app_service" "app" {
   name                = var.app_service_name
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   app_service_plan_id = azurerm_app_service_plan.asp.id
 
   site_config {
@@ -38,4 +36,3 @@ resource "azurerm_app_service" "app" {
     "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.acr.admin_password
   }
 }
-*/
