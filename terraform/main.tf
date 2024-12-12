@@ -1,3 +1,4 @@
+/*
 data "azurerm_resource_group" "main" {
   name = var.resource_group_name
 }
@@ -36,3 +37,4 @@ resource "azurerm_app_service" "app" {
     "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.acr.admin_password
   }
 }
+*/
