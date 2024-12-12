@@ -14,8 +14,14 @@ permissions:
 
 jobs:
     terraform:
-        name: Terraform Workflow
+        name: Terraform Workflow ${{ matrix.environment }}
         runs-on: ubuntu-latest
+
+        strategy:
+          matrix:
+            environment: [test, production]
+
+        environment: ${{ matrix.environment }}
 
         defaults:
             run:
@@ -31,35 +37,25 @@ jobs:
                 terraform_version: latest
 
             - name: Azure Login
-              if: github.event_name == 'pull_request'
               uses: azure/login@v1
               with:
-                client-id: ${{ vars.CLIENT_ID_PULL_REQUEST }}
+                client-id: ${{ vars.CLIENT_ID }}
                 tenant-id: ${{ vars.TENANT_ID }}
-                subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}        
-
-            - name: Azure Login
-              if: github.event_name == 'push'    
-              uses: azure/login@v1
-              with:
-                client-id: ${{ vars.CLIENT_ID_MAIN }}
-                tenant-id: ${{ vars.TENANT_ID }}
-                subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}   
+                subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}          
 
             - name: Terraform Init
-              if: github.event_name == 'pull_request'
               run: |
                 terraform init \
-                -backend-config="client_id=${{ vars.CLIENT_ID_PULL_REQUEST }}" \
+                -backend-config="client_id=${{ vars.CLIENT_ID }}" \
                 -backend-config="tenant_id=${{ vars.TENANT_ID }}"
 
-            - name: Terraform Init
-              if: github.event_name == 'push' 
+            - name: Select Terraform Workspace
               run: |
-                terraform init \
-                -backend-config="client_id=${{ vars.CLIENT_ID_MAIN }}" \
-                -backend-config="tenant_id=${{ vars.TENANT_ID }}"
-  
+                terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
+
+            - name: Log Terraform Workspace
+              run: terraform workspace show
+
             - name: Terraform Fmt Check
               run: terraform fmt -check           
 
@@ -75,11 +71,9 @@ jobs:
                   -var="app_service_plan_name=${{ vars.TF_APP_SERVICE_PLAN_NAME }}" \
                   -var="app_service_name=${{ vars.TF_APP_SERVICE_NAME }}" \
                   -var="location=${{ vars.TF_LOCATION }}" \
-                  -out=tfplan
+                  -out=tfplan-${{ matrix.environment }}
 
             - name: Terraform Apply
               if: github.event_name == 'push'    
               run: |
-                terraform apply -auto-approve tfplan
-        
-
+                terraform apply -auto-approve tfplan-${{ matrix.environment }}
