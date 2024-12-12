@@ -50,14 +50,14 @@ jobs:
               if: github.event_name == 'pull_request'
               run: |
                 terraform init \
-                -backend-config="client_id=${{ vars.CLIENT_ID_PULL_REQUEST }}"\
+                -backend-config="client_id=${{ vars.CLIENT_ID_PULL_REQUEST }}" \
                 -backend-config="tenant_id=${{ vars.TENANT_ID }}"
 
             - name: Terraform Init
               if: github.event_name == 'push' 
               run: |
                 terraform init \
-                -backend-config="client_id=${{ vars.CLIENT_ID_MAIN }}"\
+                -backend-config="client_id=${{ vars.CLIENT_ID_MAIN }}" \
                 -backend-config="tenant_id=${{ vars.TENANT_ID }}"
   
             - name: Terraform Fmt Check
